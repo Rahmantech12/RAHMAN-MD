@@ -1,26 +1,29 @@
 const config = require('../config');
 const { cmd } = require('../command');
+const fetch = require("node-fetch");
 
+// 🎬 YouTube MP4 Downloader
 cmd({
   pattern: "songx",
   alias: ["ytmp4"],
   desc: "Download YouTube video (MP4)",
   category: "main",
-  use: ".songx <video name>",
+  use: ".songx <YouTube URL>",
   react: "🔰",
   filename: __filename
 }, async (conn, mek, m, { from, reply, q }) => {
   try {
-    if (!q) return reply("❗ Please provide a video/song name.");
+    if (!q) return reply("❗ Please provide a YouTube link.");
 
-    // ⏳ Processing reaction
+    // ⏳ Processing
     await conn.sendMessage(from, { react: { text: '⏳', key: m.key } });
 
-    const url = `https://apis.davidcyriltech.my.id/song?query=${encodeURIComponent(q)}`;
+    const apiKey = config.API_KEY || ""; // 🔑 Add your API key in config
+    const url = `https://apis.davidcyriltech.my.id/youtube/mp4?url=${encodeURIComponent(q)}&apikey=${apiKey}`;
     const res = await fetch(url);
     const data = await res.json();
 
-    if (!data.status || !data.result?.video?.download_url) {
+    if (!data.status || !data.result?.url) {
       await conn.sendMessage(from, { react: { text: '❌', key: m.key } });
       return reply("❌ No video found or API error.");
     }
@@ -28,12 +31,12 @@ cmd({
     const video = data.result;
 
     await conn.sendMessage(from, {
-      video: { url: video.video.download_url },
+      video: { url: video.url },
       mimetype: "video/mp4",
-      caption: `📽️ *${video.title}*\n⏳ ${video.duration}\n👁️ ${video.views} views\n🗓️ Published: ${video.published}`
+      caption: `📽️ *${video.title || "YouTube Video"}*\n⏳ ${video.duration || "-"}\n👁️ ${video.views || "-"} views`
     }, { quoted: mek });
 
-    // ✅ Success reaction
+    // ✅ Success
     await conn.sendMessage(from, { react: { text: '✅', key: m.key } });
 
   } catch (err) {
@@ -43,26 +46,29 @@ cmd({
   }
 });
 
+
+// 🎵 YouTube MP3 Downloader
 cmd({
   pattern: "play4",
   alias: ["ytmp3"],
   desc: "Download YouTube song (MP3)",
   category: "main",
-  use: ".playx <song name>",
+  use: ".play4 <YouTube URL>",
   react: "🔰",
   filename: __filename
 }, async (conn, mek, m, { from, reply, q }) => {
   try {
-    if (!q) return reply("❗ Please provide a song name.");
+    if (!q) return reply("❗ Please provide a YouTube link.");
 
-    // ⏳ Processing reaction
+    // ⏳ Processing
     await conn.sendMessage(from, { react: { text: '⏳', key: m.key } });
 
-    const url = `https://apis.davidcyriltech.my.id/play?query=${encodeURIComponent(q)}`;
+    const apiKey = config.API_KEY || ""; // 🔑 Add your API key in config
+    const url = `https://apis.davidcyriltech.my.id/youtube/mp3?url=${encodeURIComponent(q)}&apikey=${apiKey}`;
     const res = await fetch(url);
     const data = await res.json();
 
-    if (!data.status || !data.result?.download_url) {
+    if (!data.status || !data.result?.url) {
       await conn.sendMessage(from, { react: { text: '❌', key: m.key } });
       return reply("❌ No audio found or API error.");
     }
@@ -70,14 +76,14 @@ cmd({
     const song = data.result;
 
     await conn.sendMessage(from, {
-      audio: { url: song.download_url },
+      audio: { url: song.url },
       mimetype: "audio/mpeg",
-      fileName: `${song.title}.mp3`
+      fileName: `${song.title || "YouTube Song"}.mp3`
     }, { quoted: mek });
 
-    await reply(`🎵 *${song.title}*\n Downloaded Successfully ✅`);
+    await reply(`🎵 *${song.title || "YouTube Song"}*\nDownloaded Successfully ✅`);
 
-    // ✅ Success reaction
+    // ✅ Success
     await conn.sendMessage(from, { react: { text: '✅', key: m.key } });
 
   } catch (err) {
