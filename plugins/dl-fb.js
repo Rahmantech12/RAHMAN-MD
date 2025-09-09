@@ -1,12 +1,12 @@
 const axios = require("axios");
 const { cmd } = require("../command");
 
-// Facebook Downloader v1 (Nexoracle API v1)
+// 📥 Facebook Downloader (Auto fallback with 3 APIs)
 cmd({
   pattern: "fb",
-  alias: ["facebook", "fbdl"],
+  alias: ["facebook", "fbdl", "fbvideo"],
   react: '📥',
-  desc: "Download videos from Facebook (Nexoracle API v1)",
+  desc: "Download Facebook videos (DavidCyril + Nexoracle fallback)",
   category: "download",
   use: ".fb <Facebook video URL>",
   filename: __filename
@@ -19,15 +19,51 @@ cmd({
 
     await conn.sendMessage(from, { react: { text: '⏳', key: m.key } });
 
-    const apiUrl = `https://api.nexoracle.com/downloader/facebook?apikey=58b3609c238b2b6bb6&url=${encodeURIComponent(fbUrl)}`;
-    const response = await axios.get(apiUrl);
+    let downloadLink;
 
-    if (!response.data || !response.data.result || !response.data.result[0]) {
-      return reply('❌ Unable to fetch the video.');
+    // 1️⃣ Try DavidCyril API
+    try {
+      const dcApi = `https://apis.davidcyriltech.my.id/download/fb?url=${encodeURIComponent(fbUrl)}`;
+      const { data } = await axios.get(dcApi);
+      if (data?.result?.hd || data?.result?.sd) {
+        downloadLink = data.result.hd || data.result.sd;
+      }
+    } catch (e) {
+      console.log("DavidCyril API failed, trying Nexoracle v1...");
     }
 
-    const downloadLink = response.data.result[0].url;
+    // 2️⃣ If not found, try Nexoracle v1
+    if (!downloadLink) {
+      try {
+        const nxApi1 = `https://api.nexoracle.com/downloader/facebook?apikey=58b3609c238b2b6bb6&url=${encodeURIComponent(fbUrl)}`;
+        const { data } = await axios.get(nxApi1);
+        if (data?.result?.[0]?.url) {
+          downloadLink = data.result[0].url;
+        }
+      } catch (e) {
+        console.log("Nexoracle v1 failed, trying v2...");
+      }
+    }
 
+    // 3️⃣ If still not found, try Nexoracle v2
+    if (!downloadLink) {
+      try {
+        const nxApi2 = `https://api.nexoracle.com/downloader/facebook2?apikey=58b3609c238b2b6bb6&url=${encodeURIComponent(fbUrl)}`;
+        const { data } = await axios.get(nxApi2);
+        if (data?.result?.[0]?.url) {
+          downloadLink = data.result[0].url;
+        }
+      } catch (e) {
+        console.log("Nexoracle v2 failed.");
+      }
+    }
+
+    // ❌ If all fail
+    if (!downloadLink) {
+      return reply("❌ Unable to fetch the video from all APIs.");
+    }
+
+    // ✅ Send video
     await conn.sendMessage(from, {
       video: { url: downloadLink },
       caption: `*╭───────────────━┈⍟*
@@ -36,90 +72,9 @@ cmd({
     }, { quoted: mek });
 
     await conn.sendMessage(from, { react: { text: '✅', key: m.key } });
+
   } catch (e) {
     console.error(e);
-    reply('❌ Error: Unable to download.');
-  }
-});
-
-// Facebook Downloader v2 (Nexoracle API v2)
-cmd({
-  pattern: "fb2",
-  alias: ["facebook2", "fbvideo2"],
-  react: '📥',
-  desc: "Download videos from Facebook (Nexoracle API v2)",
-  category: "download",
-  use: ".fb2 <Facebook video URL>",
-  filename: __filename
-}, async (conn, mek, m, { from, reply, args }) => {
-  try {
-    const fbUrl = args[0];
-    if (!fbUrl || !fbUrl.includes("facebook.com")) {
-      return reply('❌ Please provide a valid Facebook video URL.\nExample: `.fb2 https://facebook.com/...`');
-    }
-
-    await conn.sendMessage(from, { react: { text: '⏳', key: m.key } });
-
-    const apiUrl = `https://api.nexoracle.com/downloader/facebook2?apikey=58b3609c238b2b6bb6&url=${encodeURIComponent(fbUrl)}`;
-    const response = await axios.get(apiUrl);
-
-    if (!response.data || !response.data.result || !response.data.result[0]) {
-      return reply('❌ Unable to fetch the video.');
-    }
-
-    const downloadLink = response.data.result[0].url;
-
-    await conn.sendMessage(from, {
-      video: { url: downloadLink },
-      caption: `*╭───────────────━┈⍟*
-┋ *_ᴘᴏᴡᴇʀᴇᴅ ʙʏ ʀᴀʜᴍᴀɴ-ᴍᴅ_*
-*╰───────────────━┈⍟*`
-    }, { quoted: mek });
-
-    await conn.sendMessage(from, { react: { text: '✅', key: m.key } });
-  } catch (e) {
-    console.error(e);
-    reply('❌ Error: Unable to download.');
-  }
-});
-
-// Facebook Downloader v3 (DavidCyril API)
-cmd({
-  pattern: "fb3",
-  alias: ["facebook3"],
-  react: '📥',
-  desc: "Download videos from Facebook (DavidCyril API)",
-  category: "download",
-  use: ".fb3 <Facebook video URL>",
-  filename: __filename
-}, async (conn, mek, m, { from, reply, args }) => {
-  try {
-    const fbUrl = args[0];
-    if (!fbUrl || !fbUrl.includes("facebook.com")) {
-      return reply('❌ Please provide a valid Facebook video URL.\nExample: `.fb3 https://facebook.com/...`');
-    }
-
-    await conn.sendMessage(from, { react: { text: '⏳', key: m.key } });
-
-    const apiUrl = `https://apis.davidcyriltech.my.id/facebook3?url=${encodeURIComponent(fbUrl)}&apikey=your_api_key_here`;
-    const response = await axios.get(apiUrl);
-
-    if (!response.data || !response.data.results || !response.data.results.download) {
-      return reply('❌ Unable to fetch the video.');
-    }
-
-    const downloadLink = response.data.results.download.hdVideos?.videoUrl || response.data.results.download.sdVideos.videoUrl;
-
-    await conn.sendMessage(from, {
-      video: { url: downloadLink },
-      caption: `*╭───────────────━┈⍟*
-┋ *_ᴘᴏᴡᴇʀᴇᴅ ʙʏ ʀᴀʜᴍᴀɴ-ᴍᴅ_*
-*╰───────────────━┈⍟*`
-    }, { quoted: mek });
-
-    await conn.sendMessage(from, { react: { text: '✅', key: m.key } });
-  } catch (e) {
-    console.error(e);
-    reply('❌ Error: Unable to download.');
+    reply("❌ Error: Unable to download.");
   }
 });
