@@ -8,7 +8,7 @@ cmd({
     pattern: "play4", 
     alias: ["yta4"], 
     react: "☘️", 
-    desc: "Download YouTube song via IMMU MD API", 
+    desc: "Download YouTube song via RAHMAN MD API", 
     category: "main", 
     use: '.play2 <query or youtube url>', 
     filename: __filename 
@@ -25,7 +25,7 @@ cmd({
             ytUrl = yt.results[0].url;
         }
 
-        const apiUrl = `https://apis.davidcyriltech.my.id/youtube/mp3?url=${encodeURIComponent(ytUrl)}`;
+        const apiUrl = `https://api.princetechn.com/api/download/ytmp3?apikey=prince&url=${encodeURIComponent(ytUrl)}`;
         const res = await fetch(apiUrl);
         const data = await res.json();
 
@@ -59,7 +59,7 @@ cmd({
         if (!yt.results.length) return reply("No results found!");
 
         const song = yt.results[0];
-        const apiUrl = `https://apis.davidcyriltech.my.id/youtube/mp3?url=${encodeURIComponent(song.url)}`;
+        const apiUrl = `https://api.princetechn.com/api/download/dlmp3?apikey=prince&url=${encodeURIComponent(song.url)}`;
         
         const res = await fetch(apiUrl);
         const data = await res.json();
@@ -113,7 +113,7 @@ cmd({
             caption
         }, { quoted: mek });
 
-        const apiUrl = `https://apis.davidcyriltech.my.id/play?query=${encodeURIComponent(q)}`;
+        const apiUrl = `https://api.princetechn.com/api/download/ytmp3?apikey=prince&url=${encodeURIComponent(q)}`;
         const response = await fetch(apiUrl);
         const data = await response.json();
 
@@ -202,7 +202,7 @@ cmd({
                     });
 
                     try {
-                        const apiResponse = await fetch(`https://apis.davidcyriltech.my.id/song?query=${encodeURIComponent(yts.title)}`);
+                        const apiResponse = await fetch(`https://api.princetechn.com/api/download/mp3?apikey=prince&url=${encodeURIComponent(yts.title)}`);
                         const apiData = await apiResponse.json();
                         
                         if (!apiData.status || !apiData.result?.downloadUrl) {
