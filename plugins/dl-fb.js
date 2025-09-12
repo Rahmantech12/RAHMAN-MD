@@ -1,12 +1,12 @@
 const axios = require("axios");
 const { cmd } = require("../command");
 
-// 📥 Facebook Downloader (Auto fallback with 3 APIs)
+// 📥 Facebook Downloader (Auto fallback with 5 APIs)
 cmd({
   pattern: "fb",
   alias: ["facebook", "fbdl", "fbvideo"],
   react: '📥',
-  desc: "Download Facebook videos (DavidCyril + Nexoracle fallback)",
+  desc: "Download Facebook videos fallback",
   category: "download",
   use: ".fb <Facebook video URL>",
   filename: __filename
@@ -21,7 +21,7 @@ cmd({
 
     let downloadLink;
 
-    // 1️⃣ Try DavidCyril API
+    // 1️⃣ DavidCyril API
     try {
       const dcApi = `https://apis.davidcyriltech.my.id/download/fb?url=${encodeURIComponent(fbUrl)}`;
       const { data } = await axios.get(dcApi);
@@ -32,7 +32,7 @@ cmd({
       console.log("DavidCyril API failed, trying Nexoracle v1...");
     }
 
-    // 2️⃣ If not found, try Nexoracle v1
+    // 2️⃣ Nexoracle v1
     if (!downloadLink) {
       try {
         const nxApi1 = `https://api.nexoracle.com/downloader/facebook?apikey=58b3609c238b2b6bb6&url=${encodeURIComponent(fbUrl)}`;
@@ -45,7 +45,7 @@ cmd({
       }
     }
 
-    // 3️⃣ If still not found, try Nexoracle v2
+    // 3️⃣ Nexoracle v2
     if (!downloadLink) {
       try {
         const nxApi2 = `https://api.nexoracle.com/downloader/facebook2?apikey=58b3609c238b2b6bb6&url=${encodeURIComponent(fbUrl)}`;
@@ -54,11 +54,37 @@ cmd({
           downloadLink = data.result[0].url;
         }
       } catch (e) {
-        console.log("Nexoracle v2 failed.");
+        console.log("Nexoracle v2 failed, trying PrinceTechn v2...");
       }
     }
 
-    // ❌ If all fail
+    // 4️⃣ PrinceTechn v2
+    if (!downloadLink) {
+      try {
+        const ptApi2 = `https://api.princetechn.com/api/download/facebookv2?apikey=prince&url=${encodeURIComponent(fbUrl)}`;
+        const { data } = await axios.get(ptApi2);
+        if (data?.result?.hd || data?.result?.sd) {
+          downloadLink = data.result.hd || data.result.sd;
+        }
+      } catch (e) {
+        console.log("PrinceTechn v2 failed, trying v1...");
+      }
+    }
+
+    // 5️⃣ PrinceTechn v1
+    if (!downloadLink) {
+      try {
+        const ptApi1 = `https://api.princetechn.com/api/download/facebook?apikey=prince&url=${encodeURIComponent(fbUrl)}`;
+        const { data } = await axios.get(ptApi1);
+        if (data?.result?.hd || data?.result?.sd) {
+          downloadLink = data.result.hd || data.result.sd;
+        }
+      } catch (e) {
+        console.log("PrinceTechn v1 failed.");
+      }
+    }
+
+    // ❌ Agar sab fail ho jaye
     if (!downloadLink) {
       return reply("❌ Unable to fetch the video from all APIs.");
     }
