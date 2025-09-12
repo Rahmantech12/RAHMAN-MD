@@ -10,11 +10,11 @@ function convertToBool(text, fault = 'true') {
 
 module.exports = {
     // ===== BOT CORE SETTINGS =====
-    SESSION_ID: process.env.SESSION_ID || "IMMU~DS5jQBhL#B2L9w2Vm7wgS3iTJe8rMkgAiVhj2qeOVfY3Chcntl8o",  // Your bot's session ID (keep it secure)
+    SESSION_ID: process.env.SESSION_ID || "IMMU~rOBmQSaa#PuXcCaK9qlSule7Erlgz-yCAeZiiChKuH8Cbx-o72sM",  // Your bot's session ID (keep it secure)
     PREFIX: getConfig("PREFIX") || ".",  // Command prefix (e.g., "., / ! * - +")
     CHATBOT: getConfig("CHATBOT") || "on", // on/off chat bot 
     BOT_NAME: process.env.BOT_NAME || getConfig("BOT_NAME") || "𝐑𝐀𝐇𝐌𝐀𝐍-𝐌𝐃",  // Bot's display name
-    MODE: getConfig("MODE") || process.env.MODE || "private",        // Bot mode: public/private/group/inbox
+    MODE: getConfig("MODE") || process.env.MODE || "public",        // Bot mode: public/private/group/inbox
     REPO: process.env.REPO || "https://github.com/RAHMAN-TECH90/RAHMAN-MD",  // Bot's GitHub repo
     BAILEYS: process.env.BAILEYS || "@whiskeysockets/baileys",  // Bot's BAILEYS
 
