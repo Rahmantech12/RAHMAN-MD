@@ -3,14 +3,14 @@ const { cmd } = require('../command');
 const fetch = require("node-fetch");
 const { ytsearch } = require('@dark-yasiya/yt-dl.js'); 
 
-// 🎬 YouTube Video Downloader (song) → David Cyril API
+// 🎬 YouTube Video Downloader (song) 
 cmd({
-    pattern: "song2",
+    pattern: "song4",
     alias: ["video2", "ytv2"],
     react: "🎬",
     desc: "Download YouTube video",
     category: "downloader",
-    use: ".song2 <query/url>",
+    use: ".song <query/url>",
     filename: __filename
 }, async (conn, mek, m, { from, q, reply }) => {
     try {
@@ -25,8 +25,8 @@ cmd({
         }
         
         const vid = yt.results[0];
-        const apiKey = config.API_KEY || "";
-        const api = `https://apis.davidcyriltech.my.id/youtube/mp4?url=${encodeURIComponent(vid.url)}&apikey=${apiKey}`;
+        const apiKey = config.API_KEY || "58b3609c238b2b6bb6";
+        const api = `https://api.nexoracle.com/downloader/yt-video2?apikey=${apiKey}&url=${encodeURIComponent(vid.url)}`;
         
         const res = await fetch(api);
         const json = await res.json();
@@ -41,7 +41,7 @@ cmd({
 ├─▸ *📌 ᴛɪᴛʟᴇ:* ${vid.title}
 ├─▸ *⏳ ᴅᴜʀᴀᴛɪᴏɴ:* ${vid.timestamp}
 ├─▸ *👀 ᴠɪᴇᴡs:* ${vid.views}
-├─▸ *👤 ᴅᴜʀᴀᴛɪᴏɴ:* ${vid.author.name}
+├─▸ *👤 ᴀᴜᴛʜᴏʀ:* ${vid.author.name}
 ╰──➤ *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ʀᴀʜᴍᴀɴ-ᴍᴅ*`;
 
         await conn.sendMessage(from, {
@@ -58,13 +58,12 @@ cmd({
     }
 });
 
-
-// 🎥 YouTube Video Downloader
+// 🎥 YouTube Video Downloader 
 cmd({ 
     pattern: "video", 
     alias: ["song", "ytv"], 
     react: "🎥", 
-    desc: "Download YouTube video", 
+    desc: "Download YouTube video (DavidCyrilTech API)", 
     category: "main", 
     use: ".video <query/url>", 
     filename: __filename 
@@ -76,7 +75,7 @@ cmd({
         if (!yt.results.length) return reply("No results found!");
         
         const yts = yt.results[0];
-        // 🔑 Fixed API (NexOracle)
+        // 🔑 Fixed API (DavidCyrilTech)
         const apiUrl = `https://apis.davidcyriltech.my.id/download/ytmp4?url=${encodeURIComponent(yts.url)}`;
         
         const response = await fetch(apiUrl);
