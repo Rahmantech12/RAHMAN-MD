@@ -1,6 +1,6 @@
 const config = require('../config')
 const { cmd, commands } = require('../command')
-const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require('../lib/functions')
+const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson} = require('../lib/functions')
 
 cmd({
     pattern: "tagall",
@@ -11,21 +11,18 @@ cmd({
     use: '.tagall [message]',
     filename: __filename
 },
-async (conn, mek, m, { from, participants, reply, isGroup, isAdmins, isCreator, prefix, command, args, body }) => {
+async (conn, mek, m, { from, participants, reply, isGroup, senderNumber, groupAdmins, prefix, command, args, body }) => {
     try {
-        // ✅ Group check
-        if (!isGroup) {
-            await conn.sendMessage(from, { react: { text: '❌', key: m.key } });
-            return reply("❌ This command can only be used in groups.");
-        }
+        if (!isGroup) return reply("❌ This command can only be used in groups.");
+        
+        const botOwner = conn.user.id.split(":")[0]; // Extract bot owner's number
+        const senderJid = senderNumber + "@s.whatsapp.net";
 
-        // ✅ Permission check (Admin OR Bot Owner)
-        if (!isAdmins && !isCreator) {
-            await conn.sendMessage(from, { react: { text: '❌', key: m.key } });
+        if (!groupAdmins.includes(senderJid) && senderNumber !== botOwner) {
             return reply("❌ Only group admins or the bot owner can use this command.");
         }
 
-        // ✅ Fetch group info
+        // Ensure group metadata is fetched properly
         let groupInfo = await conn.groupMetadata(from).catch(() => null);
         if (!groupInfo) return reply("❌ Failed to fetch group information.");
 
@@ -36,18 +33,18 @@ async (conn, mek, m, { from, participants, reply, isGroup, isAdmins, isCreator, 
         let emojis = ['📢', '🔊', '🌐', '🔰', '❤‍🩹', '🤍', '🖤', '🩵', '📝', '💗', '🔖', '🪩', '📦', '🎉', '🛡️', '💸', '⏳', '🗿', '🚀', '🎧', '🪀', '⚡', '🚩', '🍁', '🗣️', '👻', '⚠️', '🔥'];
         let randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-        // ✅ Extract message
+        // Proper message extraction
         let message = body.slice(body.indexOf(command) + command.length).trim();
-        if (!message) message = "Aᴛᴛᴇɴᴛɪᴏɴ Eᴠᴇʀʏᴏɴᴇ";
+        if (!message) message = "Attention Everyone"; // Default message
 
-        let teks = `▢ Gʀᴏᴜᴘ : *${groupName}*\n▢ Mᴇᴍʙᴇʀs : *${totalMembers}*\n▢ Mᴇssᴀɢᴇ: *${message}*\n\n┌───⊷ *𝐌𝐄𝐍𝐓𝐈𝐎𝐍𝐒*\n`;
+        let teks = `▢ Group : *${groupName}*\n▢ Members : *${totalMembers}*\n▢ Message: *${message}*\n\n┌───⊷ *MENTIONS*\n`;
 
         for (let mem of participants) {
-            if (!mem.id) continue;
+            if (!mem.id) continue; // Prevent undefined errors
             teks += `${randomEmoji} @${mem.id.split('@')[0]}\n`;
         }
 
-        teks += "└──✪ ʀᴀʜᴍᴀɴ┃ᴍᴅ ✪──";
+        teks += "└──✪ ARSLAN ┃ MD ✪──";
 
         conn.sendMessage(from, { text: teks, mentions: participants.map(a => a.id) }, { quoted: mek });
 
@@ -56,3 +53,4 @@ async (conn, mek, m, { from, participants, reply, isGroup, isAdmins, isCreator, 
         reply(`❌ *Error Occurred !!*\n\n${e.message || e}`);
     }
 });
+

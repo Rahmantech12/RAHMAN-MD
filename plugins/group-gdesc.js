@@ -18,7 +18,7 @@ async (conn, mek, m, { from, isGroup, isAdmins, isBotAdmins, args, q, reply }) =
         if (!q) return reply("❌ Please provide a new group description.");
 
         await conn.groupUpdateDescription(from, q);
-        reply("✅ ɢʀᴏᴜᴘ ᴅᴇsᴄʀɪᴘᴛɪᴏɴ ʜᴀs ʙᴇᴇɴ ᴜᴘᴅᴀᴛᴇᴅ.");
+        reply("✅ Group description has been updated.");
     } catch (e) {
         console.error("Error updating group description:", e);
         reply("❌ Failed to update the group description. Please try again.");
