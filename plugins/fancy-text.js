@@ -2,7 +2,7 @@ const axios = require("axios");
 const { cmd } = require("../command");
 
 cmd({
-  pattern: "fancy",
+  pattern: "fancyfont",
   alias: ["font", "style"],
   react: "✍️",
   desc: "Convert text into various fonts.",
