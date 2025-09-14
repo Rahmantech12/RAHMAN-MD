@@ -2,7 +2,7 @@ const axios = require("axios");
 const { cmd } = require("../command");
 
 cmd({
-  pattern: "fancyfont",
+  pattern: "fancy",
   alias: ["font", "style"],
   react: "✍️",
   desc: "Convert text into various fonts.",
@@ -22,9 +22,11 @@ cmd({
     }
 
     const fonts = response.data.result.map(item => `*${item.name}:*\n${item.result}`).join("\n\n");
-    const resultText = `*ғᴀɴᴄʏ ғᴏɴᴛs ᴄᴏɴᴠᴇʀᴛᴇʀ*  \n\n${fonts}\n\n‎*╭─────────────────━┈⍟*
-‎┋ *_ᴘᴏᴡᴇʀᴇᴅ ʙʏ ʀᴀʜᴍᴀɴ-ᴛᴇᴄʜ_* 
-‎*╰─────────────────━┈⍟*`;
+    const resultText = `*ғᴀɴᴄʏ ғᴏɴᴛs ᴄᴏɴᴠᴇʀᴛᴇʀ*  
+╭───────────────━┈
+‎${fonts} 
+‎╰───────────────━┈
+*_ᴘᴏᴡᴇʀᴇᴅ ʙʏ ʀᴀʜᴍᴀɴ-ᴛᴇᴄʜ_*`;
 
     await conn.sendMessage(from, { text: resultText }, { quoted: m });
   } catch (error) {
