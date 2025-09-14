@@ -1,7 +1,7 @@
 const axios = require("axios");
 const { cmd } = require("../command");
 
-// Facebook Downloader v1 (Nexoracle API v1)
+// Facebook Downloader Sandarux
 cmd({
   pattern: "fb",
   alias: ["facebook", "fbdl"],
@@ -19,7 +19,7 @@ cmd({
 
     await conn.sendMessage(from, { react: { text: '⏳', key: m.key } });
 
-    const apiUrl = `https://api.nexoracle.com/downloader/facebook?apikey=58b3609c238b2b6bb6&url=${encodeURIComponent(fbUrl)}`;
+    const apiUrl = `https://apis.sandarux.sbs/api/fbnew/facebook?url=${encodeURIComponent(fbUrl)}`;
     const response = await axios.get(apiUrl);
 
     if (!response.data || !response.data.result || !response.data.result[0]) {
@@ -42,7 +42,7 @@ cmd({
   }
 });
 
-// Facebook Downloader v2 (Nexoracle API v2)
+// Facebook Downloader Sandarux
 cmd({
   pattern: "fb2",
   alias: ["facebook2", "fbvideo2"],
@@ -60,7 +60,7 @@ cmd({
 
     await conn.sendMessage(from, { react: { text: '⏳', key: m.key } });
 
-    const apiUrl = `https://api.nexoracle.com/downloader/facebook2?apikey=58b3609c238b2b6bb6&url=${encodeURIComponent(fbUrl)}`;
+    const apiUrl = `https://apis.sandarux.sbs/api/download/fbdown?url=${encodeURIComponent(fbUrl)}`;
     const response = await axios.get(apiUrl);
 
     if (!response.data || !response.data.result || !response.data.result[0]) {
