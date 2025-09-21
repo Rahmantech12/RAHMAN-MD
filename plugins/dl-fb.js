@@ -42,12 +42,12 @@ cmd({
   }
 });
 
-// Facebook Downloader Sandarux
+// Facebook Downloader 
 cmd({
   pattern: "fb2",
   alias: ["facebook2", "fbvideo2"],
   react: '📥',
-  desc: "Download videos from Facebook (Nexoracle API v2)",
+  desc: "Download videos from Facebook",
   category: "download",
   use: ".fb2 <Facebook video URL>",
   filename: __filename
@@ -83,12 +83,12 @@ cmd({
   }
 });
 
-// Facebook Downloader v3 (DavidCyril API)
+// Facebook Downloader 
 cmd({
   pattern: "fb3",
   alias: ["facebook3"],
   react: '📥',
-  desc: "Download videos from Facebook (DavidCyril API)",
+  desc: "Download videos from Facebook",
   category: "download",
   use: ".fb3 <Facebook video URL>",
   filename: __filename
