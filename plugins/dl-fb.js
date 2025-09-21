@@ -1,7 +1,7 @@
 const axios = require("axios");
 const { cmd } = require("../command");
 
-// Facebook Downloader Sandarux
+// Facebook Downloader Prince 
 cmd({
   pattern: "fb",
   alias: ["facebook", "fbdl"],
