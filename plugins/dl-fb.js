@@ -60,7 +60,7 @@ cmd({
 
     await conn.sendMessage(from, { react: { text: '⏳', key: m.key } });
 
-    const apiUrl = `https://apis.sandarux.sbs/api/download/fbdown?url=${encodeURIComponent(fbUrl)}`;
+    const apiUrl = `https://gtech-api-xtp1.onrender.com/api/download/fb?url=${encodeURIComponent(fbUrl)}`;
     const response = await axios.get(apiUrl);
 
     if (!response.data || !response.data.result || !response.data.result[0]) {
@@ -101,7 +101,7 @@ cmd({
 
     await conn.sendMessage(from, { react: { text: '⏳', key: m.key } });
 
-    const apiUrl = `https://apis.davidcyriltech.my.id/facebook3?url=${encodeURIComponent(fbUrl)}&apikey=your_api_key_here`;
+    const apiUrl = `https://gtech-api-xtp1.onrender.com/api/dl/facebook?apikey=APIKEY&url=${encodeURIComponent(fbUrl)}&apikey=your_api_key_here`;
     const response = await axios.get(apiUrl);
 
     if (!response.data || !response.data.results || !response.data.results.download) {
