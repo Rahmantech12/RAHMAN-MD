@@ -6,7 +6,7 @@ cmd({
   pattern: "fb",
   alias: ["facebook", "fbdl"],
   react: '📥',
-  desc: "Download videos from Facebook (Nexoracle API v1)",
+  desc: "Download videos from Facebook (PRINCE API)",
   category: "download",
   use: ".fb <Facebook video URL>",
   filename: __filename
@@ -19,7 +19,7 @@ cmd({
 
     await conn.sendMessage(from, { react: { text: '⏳', key: m.key } });
 
-    const apiUrl = `https://apis.sandarux.sbs/api/fbnew/facebook?url=${encodeURIComponent(fbUrl)}`;
+    const apiUrl = `https://api.princetechn.com/api/download/facebook?apikey=prince&url=${encodeURIComponent(fbUrl)}`;
     const response = await axios.get(apiUrl);
 
     if (!response.data || !response.data.result || !response.data.result[0]) {
