@@ -24,7 +24,7 @@ cmd({
 
     try {
         await conn.sendMessage(m.chat, {
-            image: { url: "https://files.catbox.moe/84jssf.jpg" },
+            image: { url: "https://files.catbox.moe/o8gic9.jpg" },
             caption: familyList.trim()
         }, { quoted: mek });
 
