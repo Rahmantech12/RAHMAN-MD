@@ -73,7 +73,7 @@ cmd({
         if (!yt.results.length) return reply("No results found!");
 
         const song = yt.results[0];
-        const apiUrl = `https://ab-ytdlv2.abrahamdw882.workers.dev/?url=${encodeURIComponent(song.url)}`;
+        const apiUrl = `https://okatsu-rolezapiiz.vercel.app/downloader/ytmp3?url=${encodeURIComponent(song.url)}`;
         
         const res = await fetch(apiUrl);
         const data = await res.json();
@@ -130,7 +130,7 @@ cmd({
         }, { quoted: mek });
 
         // Step 3: Fetch audio URL
-        const apiUrl = `https://apis.davidcyriltech.my.id/play?query=${encodeURIComponent(vid.url)}`;
+        const apiUrl = `https://jawad-tech.vercel.app/download/yt?url=${encodeURIComponent(vid.url)}`;
         const response = await fetch(apiUrl);
         const data = await response.json();
 
