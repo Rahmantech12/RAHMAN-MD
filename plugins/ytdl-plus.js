@@ -44,8 +44,8 @@ cmd({
 });
 
 cmd({
-  pattern: "play",
-  alias: ["ytmp3"],
+  pattern: "play8",
+  alias: ["ytmp38"],
   desc: "Download YouTube song (MP3)",
   category: "main",
   use: ".play <song name>",
