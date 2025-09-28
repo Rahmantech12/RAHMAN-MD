@@ -66,7 +66,7 @@ cmd({
         await conn.sendMessage(from, { react: { text: '⏳', key: m.key } });
 
         // Fetch video from BK9 API
-        const { data } = await axios.get(`https://api.dreaded.site/api/tiktok?url=${encodeURIComponent(url)}`);
+        const { data } = await axios.get(`https://api.apigratis.tech/downloader/tiktok?url=${encodeURIComponent(url)}`);
         
         if (!data?.status || !data.BK9?.video?.noWatermark) {
             throw new Error("No video found in API response");
