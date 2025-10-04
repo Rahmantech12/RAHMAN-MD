@@ -1,60 +1,72 @@
-const config = require('../config');
 const { cmd } = require('../command');
-const yts = require('yt-search');
+const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
 
 cmd({
-    pattern: "vidx",
-    alias: ["mpx", "sg"],
-    react: "🎥",
-    desc: "Download video from YouTube",
-    category: "download",
-    use: ".video <query or url>",
-    filename: __filename
-}, async (conn, m, mek, { from, q, reply }) => {
-    try {
-        if (!q) return await reply("❌ Please provide a video name or YouTube URL!");
+  pattern: "video",
+  alias: ["ytxx", "youtube"],
+  desc: "Download YouTube videos using Jawad-Tech API",
+  category: "downloader",
+  react: "🎥",
+  filename: __filename
+}, async (conn, mek, m, { from, q, reply }) => {
+  try {
+    if (!q) return reply("⚠️ Please provide a valid YouTube link!\n\nExample: *.yt https://youtu.be/xyz123*");
 
-        let videoUrl, title;
-        
-        // Check if it's a URL
-        if (q.match(/(youtube\.com|youtu\.be)/)) {
-            videoUrl = q;
-            const videoInfo = await yts({ videoId: q.split(/[=/]/).pop() });
-            title = videoInfo.title;
-        } else {
-            // Search YouTube
-            const search = await yts(q);
-            if (!search.videos.length) return await reply("❌ No results found!");
-            videoUrl = search.videos[0].url;
-            title = search.videos[0].title;
-        }
+    const statusMsg = await reply("⏳ Fetching your video, please wait...");
 
-        await reply("*_ʀᴀʜᴍᴀɴ-ᴍᴅ ᴜᴘʟᴏᴀᴅɪɴɢ ʏᴏᴜʀ ᴠɪᴅᴇᴏ_*...");
+    // Call API
+    const apiUrl = `https://jawad-tech.vercel.app/download/yt?url=${encodeURIComponent(q)}`;
+    const { data } = await axios.get(apiUrl);
 
-        // Use API to get video
-        const apiUrl = `https://jawad-tech.vercel.app/download/yt?url=${encodeURIComponent(videoUrl)}`;
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-
-        if (!data.success) return await reply("❌ Failed to download video!");
-
-        await conn.sendMessage(from, {
-            video: { url: data.result.download_url },
-            mimetype: 'video/mp4',
-            caption: `‎*_ʀᴀʜᴍᴀɴ-ᴍᴅ ᴠɪᴅᴇᴏ ᴅᴏᴡɴʟᴏᴀᴅᴇʀ_*
-‎*╭───────────────━┈⍟*
-‎    *${video.title}*
-‎*╰───────────────━┈⍟*
-‎*╭────◉◉◉──────────៚*
-‎*┋* *_ᴘᴏᴡᴇʀᴇᴅ ʙʏ ʀᴀʜᴍᴀɴ-ᴍᴅ_* 
-‎*╰────◉◉◉──────────៚*`
-        }, { quoted: mek });
-
-        await reply(`✅ *${title}* downloaded successfully!`);
-
-    } catch (error) {
-        console.error(error);
-        await reply(`❌ Error: ${error.message}`);
+    if (!data || !data.download_url) {
+      return reply("❌ Failed to get download link. Maybe invalid or unsupported URL.");
     }
+
+    const videoUrl = data.download_url;
+    const title = data.title || "YouTube Video";
+
+    // Download video temporarily
+    const filePath = path.join(__dirname, `${Date.now()}.mp4`);
+    const writer = fs.createWriteStream(filePath);
+    const response = await axios({
+      url: videoUrl,
+      method: 'GET',
+      responseType: 'stream'
+    });
+
+    response.data.pipe(writer);
+
+    writer.on('finish', async () => {
+      try {
+        await conn.sendMessage(from, { 
+          video: fs.readFileSync(filePath), 
+          caption: `
+╭════════════════════╮
+🎬 𝐘𝐎𝐔𝐓𝐔𝐁𝐄 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃𝐄𝐑  
+╰════════════════════╯
+🎥 *𝐓𝐈𝐓𝐋𝐄:* ${title}
+
+   𝑷𝒐𝒘𝒆𝒓𝒆𝒅 𝒃𝒚 𝑹𝒂𝒉𝒎𝒂𝒏-𝒎𝒅
+`, 
+          mimetype: 'video/mp4' 
+        });
+        fs.unlinkSync(filePath);
+        await conn.sendMessage(from, { delete: statusMsg.key });
+      } catch (err) {
+        console.error(err);
+        reply("❌ Error sending video. File may be too large.");
+      }
+    });
+
+    writer.on('error', (err) => {
+      console.error(err);
+      reply("❌ Error downloading video.");
+    });
+
+  } catch (err) {
+    console.error(err);
+    reply("❌ Something went wrong! Please try again later.");
+  }
 });
-        
