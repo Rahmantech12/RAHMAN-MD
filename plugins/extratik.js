@@ -3,180 +3,101 @@ const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 
-async function downloadTikTok(conn, from, m, q, reply, version, apiUrl, captionStyle) {
+cmd({
+  pattern: "rtiktok",
+  alias: ["rtt", "tiktokdl"],
+  desc: "🎵 Download TikTok Video (Auto-Fallback Prince API)",
+  category: "downloader",
+  react: "🎬",
+  filename: __filename
+}, async (conn, mek, m, { from, q, reply }) => {
   try {
-    if (!q) return reply("⚠️ Please provide a valid TikTok video link!");
+    if (!q) return reply("⚠️ Please provide a valid TikTok link!");
 
-    // Step 1: Send initial message
-    const statusMsg = await reply("⬇️ *Downloading video...*");
+    await reply("⏳ *Fetching TikTok video... Please wait!*");
 
-    // Fetch video data
-    const res = await axios.get(`${apiUrl}${encodeURIComponent(q)}`);
-    const data = res.data.data || res.data.video || res.data.result || res.data;
+    // 🔹 Prince API list (auto fallback)
+    const apis = [
+      `https://api.princetechn.com/api/download/tiktok?apikey=prince_tech_api_azfsbshfb&url=${encodeURIComponent(q)}`,
+      `https://api.princetechn.com/api/download/tiktokdlv2?apikey=prince_tech_api_azfsbshfb&url=${encodeURIComponent(q)}`,
+      `https://api.princetechn.com/api/download/tiktokdlv3?apikey=prince_tech_api_azfsbshfb&url=${encodeURIComponent(q)}`,
+      `https://api.princetechn.com/api/download/tiktokdlv4?apikey=prince_tech_api_azfsbshfb&url=${encodeURIComponent(q)}`
+    ];
 
-    if (!data) return reply(`❌ Failed to fetch data from API ${version}.`);
+    let videoUrl = null, data = null, successApi = null;
 
-    const videoUrl =
-      data.nowatermark ||
-      data.no_watermark ||
-      data.play ||
-      data.play_url ||
-      data.url ||
-      data.video;
+    // Try all APIs until one works
+    for (const api of apis) {
+      try {
+        const res = await axios.get(api);
+        const raw = res.data;
 
-    if (!videoUrl) return reply("❌ No valid download link found!");
+        data =
+          raw.data?.video ||
+          raw.data?.result ||
+          raw.data ||
+          raw.result ||
+          raw;
 
-    // Step 2: Update message to “Processing...”
-    try {
-      await conn.sendMessage(from, { text: "⚙️ *Processing video...*", edit: statusMsg.key });
-    } catch {
-      await reply("⚙️ *Processing video...*");
+        videoUrl =
+          data?.nowatermark ||
+          data?.no_watermark ||
+          data?.url ||
+          data?.play ||
+          data?.play_url ||
+          data?.video?.url ||
+          data?.video?.no_watermark ||
+          data?.data?.play ||
+          data?.data?.url ||
+          null;
+
+        if (videoUrl) {
+          successApi = api;
+          break;
+        }
+      } catch (e) {
+        console.log("❌ API failed:", api);
+      }
     }
 
-    // Create temp folder if not exists
-    const tempDir = path.join(__dirname, '../temp');
+    if (!videoUrl) {
+      return reply("❌ All APIs failed! No valid download link found.");
+    }
+
+    // 🧩 Downloading video
+    const tempDir = path.join(__dirname, "../temp");
     if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
 
-    // Download video to temp
-    const filePath = path.join(tempDir, `tiktok_${version}_${Date.now()}.mp4`);
-    const video = await axios.get(videoUrl, { responseType: 'arraybuffer' });
-    fs.writeFileSync(filePath, video.data);
+    const filePath = path.join(tempDir, `tiktok_${Date.now()}.mp4`);
+    const videoBuffer = await axios.get(videoUrl, { responseType: "arraybuffer" });
+    fs.writeFileSync(filePath, videoBuffer.data);
 
-    // Step 3: Update message to “Done ✅”
-    try {
-      await conn.sendMessage(from, { text: "✅ *Download complete!* Sending video...", edit: statusMsg.key });
-    } catch {
-      await reply("✅ *Download complete!* Sending video...");
-    }
+    // 🎨 Stylish caption
+    const caption = `
+╭═════════════════════╮
+   💫 𝑻𝒊𝒌𝑻𝒐𝒌 𝑫𝒐𝒘𝒏𝒍𝒐𝒂𝒅𝒆𝒓 💫
+╰═════════════════════╯
 
-    // 🎨 Stylish Captions
-    let caption;
-    switch (captionStyle) {
-      case 1:
-        caption = `
-╭═══════🎵═══════╮
-     ✨ 𝑻𝒊𝒌𝑻𝒐𝒌 𝑫𝒐𝒘𝒏𝒍𝒐𝒂𝒅𝒆𝒓 ✨
-╰═══════🎵═══════╯
+🎬 *Title:* ${data.title || "Unknown"}
+👤 *Author:* ${data.author || "Unknown"}
+📡 *API Used:* ${successApi.includes("v4") ? "Version 4" : successApi.includes("v3") ? "Version 3" : successApi.includes("v2") ? "Version 2" : "Main"}
+🌍 *Source:* TikTok
 
-🎬 *Title:* ${data.title || "No Title"}
-👑 *Creator:* ${data.author || "Unknown"}
-📦 *API:* Version 4
-🌐 *Source:* TikTok
+⚡ *Powered by 𝑹𝒂𝒉𝒎𝒂𝒏-𝒎𝒅* ⚡
+`;
 
-⚡ 𝑷𝒐𝒘𝒆𝒓𝒆𝒅 𝒃𝒚 𝑹𝒂𝒉𝒎𝒂𝒏-𝒎𝒅 ⚡`;
-        break;
-
-      case 2:
-        caption = `
-╭━━━💎━━━━━━━💎━━━╮
-      💫 𝑻𝒊𝒌𝑻𝒐𝒌 𝑫𝒐𝒘𝒏𝒍𝒐𝒂𝒅𝒆𝒓 💫
-╰━━━💎━━━━━━━💎━━━╯
-
-🎧 *Title:* ${data.title || "Untitled"}
-🎀 *Artist:* ${data.author || "Unknown"}
-⚙️ *API:* Version 3
-📲 *Platform:* TikTok
-
-⚡ 𝑷𝒐𝒘𝒆𝒓𝒆𝒅 𝒃𝒚 𝑹𝒂𝒉𝒎𝒂𝒏-𝒎𝒅 ⚡`;
-        break;
-
-      case 3:
-        caption = `
-╭────────🔥─────────╮
-   🔥 𝑻𝒊𝒌𝑻𝒐𝒌  𝑫𝒐𝒘𝒏𝒍𝒐𝒂𝒅𝒆𝒓 🔥
-╰───────🔥──────────╯
-
-🎥 *Title:* ${data.title || "Unknown"}
-🧑‍💻 *Uploader:* ${data.author || "Unknown"}
-🧩 *API:* Version 2
-📡 *Source:* TikTok
-
-⚡ 𝑷𝒐𝒘𝒆𝒓𝒆𝒅 𝒃𝒚 𝑹𝒂𝒉𝒎𝒂𝒏-𝒎𝒅 ⚡`;
-        break;
-
-      case 4:
-        caption = `
-╭━━━━━━━━━━━━━━━╮
-🚀  𝑻𝒊𝒌𝑻𝒐𝒌 𝑫𝒐𝒘𝒏𝒍𝒐𝒂𝒅𝒆𝒓   🚀
-╰━━━━━━━━━━━━━━━╯
-
-🎵 *Track:* ${data.title || "Untitled"}
-🎤 *Author:* ${data.author || "Unknown"}
-🛠️ *API:* Main
-🌍 *Platform:* TikTok
-
-⚡ 𝑷𝒐𝒘𝒆𝒓𝒆𝒅 𝒃𝒚 𝑹𝒂𝒉𝒎𝒂𝒏-𝒎𝒅 ⚡`;
-        break;
-
-      default:
-        caption = "🎵 TikTok Downloader\n⚡ Powered by Rahman-md ⚡";
-        break;
-    }
-
-    // Send final video
+    // 🎥 Send video
     await conn.sendMessage(from, {
       video: fs.readFileSync(filePath),
       caption,
-    }, { quoted: m });
+      mimetype: "video/mp4",
+    }, { quoted: mek });
 
-    // Safe cleanup
-    fs.unlink(filePath, () => {});
+    fs.unlinkSync(filePath);
+    await conn.sendMessage(from, { text: "✅ *Video sent successfully!*" }, { quoted: mek });
+
   } catch (err) {
-    console.error(err);
-    reply(`❌ Error downloading TikTok video (API ${version}).`);
+    console.error("TikTok Downloader Error:", err);
+    reply("❌ Something went wrong while downloading the TikTok video!");
   }
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// Commands
-cmd({
-  pattern: "rtiktok1",
-  alias: ["rtt1"],
-  desc: "🎵 Download TikTok Video (API v4)",
-  category: "downloader",
-  react: "🎬",
-  filename: __filename
-}, async (conn, mek, m, { from, q, reply }) => {
-  await downloadTikTok(conn, from, m, q, reply, "v4",
-    "https://api.princetechn.com/api/download/tiktokdlv4?apikey=prince_tech_api_azfsbshfb&url=",
-    1);
-});
-
-cmd({
-  pattern: "rtiktok2",
-  alias: ["rtt2"],
-  desc: "🎵 Download TikTok Video (API v3)",
-  category: "downloader",
-  react: "🎬",
-  filename: __filename
-}, async (conn, mek, m, { from, q, reply }) => {
-  await downloadTikTok(conn, from, m, q, reply, "v3",
-    "https://api.princetechn.com/api/download/tiktokdlv3?apikey=prince_tech_api_azfsbshfb&url=",
-    2);
-});
-
-cmd({
-  pattern: "rtiktok3",
-  alias: ["rtt3"],
-  desc: "🎵 Download TikTok Video (API v2)",
-  category: "downloader",
-  react: "🎬",
-  filename: __filename
-}, async (conn, mek, m, { from, q, reply }) => {
-  await downloadTikTok(conn, from, m, q, reply, "v2",
-    "https://api.princetechn.com/api/download/tiktokdlv2?apikey=prince_tech_api_azfsbshfb&url=",
-    3);
-});
-
-cmd({
-  pattern: "rtiktok4",
-  alias: ["rtt4"],
-  desc: "🎵 Download TikTok Video (Main API)",
-  category: "downloader",
-  react: "🎬",
-  filename: __filename
-}, async (conn, mek, m, { from, q, reply }) => {
-  await downloadTikTok(conn, from, m, q, reply, "main",
-    "https://api.princetechn.com/api/download/tiktok?apikey=prince_tech_api_azfsbshfb&url=",
-    4);
 });

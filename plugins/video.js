@@ -1,72 +1,100 @@
-const { cmd } = require('../command');
-const axios = require('axios');
-const fs = require('fs');
-const path = require('path');
+const { cmd } = require("../command");
+const fetch = require("node-fetch");
+const yts = require("yt-search");
 
+// 🎵 Play Command (David API)
+cmd({
+  pattern: "ply",
+  alias: ["sng", "mp"],
+  desc: "Download YouTube Audio",
+  category: "downloader",
+  react: "🎶",
+  filename: __filename
+}, async (conn, mek, m, { from, q, reply }) => {
+  try {
+    if (!q) return reply("Please provide a YouTube link or search query.\nExample: .play madine wale");
+
+    let url;
+    if (q.includes("youtube.com") || q.includes("youtu.be")) {
+      url = q;
+    } else {
+      let search = await yts(q);
+      if (!search || !search.videos || search.videos.length === 0) return reply("No results found.");
+      url = search.videos[0].url;
+    }
+
+    // ✅ David API call
+    let res = await fetch(`https://apis.davidcyriltech.my.id/api/play?query=${encodeURIComponent(url)}`);
+    let data = await res.json();
+
+    if (!data || !data.status) return reply("Failed to fetch audio from API.");
+
+    // ✅ Flexible audio URL
+    let audioUrl = data.result?.download_url || data.result?.url || data.result?.audio;
+
+    if (!audioUrl) return reply("No audio found in API response.");
+
+    await conn.sendMessage(
+      from,
+      {
+        audio: { url: audioUrl },
+        mimetype: "audio/mpeg",
+        fileName: `${data.result?.title || "song"}.mp3`
+      },
+      { quoted: mek }
+    );
+
+  } catch (e) {
+    reply("❌ Error while fetching audio.");
+    console.log("Play Command Error:", e);
+  }
+});
+
+// 📹 Video Command (GTech API)
 cmd({
   pattern: "video",
-  alias: ["ytxx", "youtube"],
-  desc: "Download YouTube videos using Jawad-Tech API",
+  alias: ["vid", "ytv"],
+  desc: "Download YouTube Video",
   category: "downloader",
   react: "🎥",
   filename: __filename
 }, async (conn, mek, m, { from, q, reply }) => {
   try {
-    if (!q) return reply("⚠️ Please provide a valid YouTube link!\n\nExample: *.yt https://youtu.be/xyz123*");
+    if (!q) return reply("Please provide a YouTube link or search query.\nExample: .video Pasoori");
 
-    const statusMsg = await reply("⏳ Fetching your video, please wait...");
-
-    // Call API
-    const apiUrl = `https://jawad-tech.vercel.app/download/yt?url=${encodeURIComponent(q)}`;
-    const { data } = await axios.get(apiUrl);
-
-    if (!data || !data.download_url) {
-      return reply("❌ Failed to get download link. Maybe invalid or unsupported URL.");
+    let url;
+    if (q.includes("youtube.com") || q.includes("youtu.be")) {
+      url = q;
+    } else {
+      let search = await yts(q);
+      if (!search || !search.videos || search.videos.length === 0) return reply("No results found.");
+      url = search.videos[0].url;
     }
 
-    const videoUrl = data.download_url;
-    const title = data.title || "YouTube Video";
+    // ✅ GTech API call
+    let res = await fetch(`https://gtech-api-xtp1.onrender.com/api/video/yt?apikey=APIKEY&url=${encodeURIComponent(url)}`);
+    let data = await res.json();
 
-    // Download video temporarily
-    const filePath = path.join(__dirname, `${Date.now()}.mp4`);
-    const writer = fs.createWriteStream(filePath);
-    const response = await axios({
-      url: videoUrl,
-      method: 'GET',
-      responseType: 'stream'
-    });
+    if (!data || !data.status) return reply("Failed to fetch video from API.");
 
-    response.data.pipe(writer);
+    // ✅ Flexible video URL (HD or SD)
+    let videoUrl = data.result?.media?.video_url_hd && data.result.media.video_url_hd !== "No HD video URL available"
+      ? data.result.media.video_url_hd
+      : data.result?.media?.video_url_sd;
 
-    writer.on('finish', async () => {
-      try {
-        await conn.sendMessage(from, { 
-          video: fs.readFileSync(filePath), 
-          caption: `
-╭════════════════════╮
-🎬 𝐘𝐎𝐔𝐓𝐔𝐁𝐄 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃𝐄𝐑  
-╰════════════════════╯
-🎥 *𝐓𝐈𝐓𝐋𝐄:* ${title}
+    if (!videoUrl) return reply("No downloadable video found.");
 
-   𝑷𝒐𝒘𝒆𝒓𝒆𝒅 𝒃𝒚 𝑹𝒂𝒉𝒎𝒂𝒏-𝒎𝒅
-`, 
-          mimetype: 'video/mp4' 
-        });
-        fs.unlinkSync(filePath);
-        await conn.sendMessage(from, { delete: statusMsg.key });
-      } catch (err) {
-        console.error(err);
-        reply("❌ Error sending video. File may be too large.");
-      }
-    });
+    await conn.sendMessage(
+      from,
+      {
+        video: { url: videoUrl },
+        caption: `🎬 ${data.result?.title || "*𝑹𝒂𝒉𝒎𝒂𝒏-𝒎𝒅 𝒗𝒊𝒅𝒆𝒐 𝒅𝒐𝒘𝒏𝒍𝒐𝒂𝒅𝒆𝒓*"}\n\n*𝑷𝒐𝒘𝒆𝒓𝒆𝒅 𝒃𝒚 𝑹𝒂𝒉𝒎𝒂𝒏 𝒎𝒅*`
+      },
+      { quoted: mek }
+    );
 
-    writer.on('error', (err) => {
-      console.error(err);
-      reply("❌ Error downloading video.");
-    });
-
-  } catch (err) {
-    console.error(err);
-    reply("❌ Something went wrong! Please try again later.");
+  } catch (e) {
+    reply("❌ Error while fetching video.");
+    console.log("Video Command Error:", e);
   }
 });
