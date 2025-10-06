@@ -4,8 +4,8 @@ const fs = require('fs');
 const path = require('path');
 
 cmd({
-  pattern: "tiktok",
-  alias: ["tt", "tiktokdl"],
+  pattern: "rtiktok",
+  alias: ["rtt", "rtiktokdl"],
   desc: "🎵 Download TikTok video using TikWM API",
   category: "downloader",
   react: "🎬",
