@@ -12,7 +12,7 @@ cmd({
 },
 async (conn, mek, m, { from, q, reply }) => {
     try {
-        if (!q) return reply("❌ Please provide a question to ask Meta AI.");
+        if (!q) return reply("❌ Please provide a question to ask Rahman AI.");
 
         // React: Processing
         await conn.sendMessage(from, { react: { text: '⏳', key: m.key } });
