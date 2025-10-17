@@ -1,0 +1,83 @@
+/*
+───────────────────────────────────────────────
+💃 𝗙𝗘𝗠𝗔𝗟𝗘 𝗨𝗥𝗗𝗨 𝗩𝗢𝗜𝗖𝗘 𝗖𝗢𝗠𝗠𝗔𝗡𝗗 🎙️
+✨ Powered by 𝐑𝐀𝐇𝐌𝐀𝐍-𝐌𝐃 💫
+───────────────────────────────────────────────
+*/
+
+const { cmd } = require('../command');
+const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
+
+// 🔑 Apni ElevenLabs API key (use .env for safety)
+const ELEVEN_API_KEY = "sk_9c9984fa12461277643e9f862713ec5a46b21161dc439711";
+
+// 🌸 Female Urdu model voice
+const VOICE_ID = "21m00Tcm4TlvDq8ikWAM";
+const MODEL_ID = "eleven_multilingual_v2";
+
+cmd({
+    pattern: "voiceurdu",
+    alias: ["urduvoice", "aivoice"],
+    desc: "Convert Urdu/Roman Urdu text to Female AI Voice 🎙️",
+    category: "AI",
+    react: "💃",
+    filename: __filename
+},
+async (conn, mek, m, { text }) => {
+    if (!text) return m.reply("💬 *براہ کرم اردو میں کوئی جملہ لکھیں!*\nمثال: `.voiceurdu آپ کیسے ہیں؟`");
+
+    try {
+        const tempDir = path.join(__dirname, "../temp");
+        if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
+
+        const filePath = path.join(tempDir, `urdu-${Date.now()}.mp3`);
+
+        // 🧠 ElevenLabs API request
+        const response = await axios({
+            method: "POST",
+            url: `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`,
+            headers: {
+                "xi-api-key": ELEVEN_API_KEY,
+                "Content-Type": "application/json",
+                "Accept": "audio/mpeg"
+            },
+            data: {
+                text,
+                model_id: MODEL_ID,
+                voice_settings: {
+                    stability: 0.55,
+                    similarity_boost: 0.9
+                }
+            },
+            responseType: "arraybuffer"
+        });
+
+        fs.writeFileSync(filePath, response.data);
+
+        const caption = `
+╭──🎙️ *AI Urdu Female Voice*
+│💬 ${text}
+│
+│✨ *Powered by Rahman-md 💫*
+╰────────────────────────────`;
+
+        await conn.sendMessage(
+            m.chat,
+            {
+                audio: fs.readFileSync(filePath),
+                mimetype: "audio/mpeg",
+                ptt: true,
+                caption,
+            },
+            { quoted: m }
+        );
+
+        fs.unlinkSync(filePath);
+
+    } catch (err) {
+        console.error("ElevenLabs Error:", err.response?.data || err.message);
+        m.reply("❌ *Error:* Urdu Female voice generate نہیں ہو سکی۔\nاپنی API key چیک کریں۔");
+    }
+});
