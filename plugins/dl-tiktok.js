@@ -24,14 +24,14 @@ async (conn, mek, m, { from, args, q, reply }) => {
         const { title, like, comment, share, author, meta } = data.data;
         const videoUrl = meta.media.find(v => v.type === "video").org;
         
-        const caption = `‎*╭┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉━┈⍟*
+        const caption = `‎*╭┉┉┉┉┉┉┉┉┉┉┉┉┉┉━┈⍟*
 ‎*┋* *_ʀᴀʜᴍᴀɴ-ᴍᴅ ᴛɪᴋ ᴅᴏᴡɴʟᴏᴀᴅᴇʀ_* 
-‎*┋┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉━•⟢*
+‎*┋┉┉┉┉┉┉┉┉┉┉┉┉┉┉━•⟢*
 ‎*┋▸* 👤 *_ᴜsᴇʀ: ${author.nickname} (@${author.username})_*
 ‎*┋▸* ❤️ *_ʟɪᴋᴇs: ${like}_*
 ‎*┋▸* 💬 *_ᴄᴏᴍᴍᴇɴᴛs: ${comment}_*
 ‎*┋▸* 🔁 *_sʜᴀʀᴇs: ${share}_* 
-‎*╰┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉━┈⍟*
+‎*╰┉┉┉┉┉┉┉┉┉┉┉┉┉┉━┈⍟*
 ‎‎*╭┉┉┉┉◉◉◉┉┉┉┉┉┉┉━┈៚*
 ‎*┋* *_ᴘᴏᴡᴇʀᴇᴅ ʙʏ ʀᴀʜᴍᴀɴ-ᴍᴅ_* 
 ‎*╰┉┉┉┉◉◉◉┉┉┉┉┉┉┉━┈៚*`;
