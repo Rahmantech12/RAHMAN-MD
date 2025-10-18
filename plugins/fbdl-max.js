@@ -1,57 +1,68 @@
 const axios = require("axios");
 const { cmd } = require("../command");
 
-
 cmd({
   pattern: "fb",
   alias: ["facebook", "fbdl"],
   react: '📥',
   desc: "Download videos from Facebook (API v4)",
   category: "download",
-  use: ".fb4 <Facebook video URL>",
+  use: ".fb <Facebook video URL>",
   filename: __filename
 }, async (conn, mek, m, { from, reply, args }) => {
   try {
     const fbUrl = args[0];
     if (!fbUrl || !fbUrl.includes("facebook.com")) {
-      return reply('❌ Please provide a valid Facebook video URL.\n\nExample:\n.fb4 https://facebook.com/...');
+      return reply('❌ Please provide a valid Facebook video URL.\n\nExample:\n.fb https://facebook.com/...');
     }
 
+    // React loading
     await conn.sendMessage(from, { react: { text: '⏳', key: m.key } });
 
     const apiUrl = `https://jawad-tech.vercel.app/downloader?url=${encodeURIComponent(fbUrl)}`;
-    const response = await axios.get(apiUrl);
+    const { data } = await axios.get(apiUrl);
 
-    const data = response.data;
-
-    if (!data.status || !data.result || !Array.isArray(data.result)) {
-      return reply('❌ Unable to fetch the video. Please check the URL and try again.');
+    if (!data || data.status !== true || !data.result) {
+      await conn.sendMessage(from, { react: { text: '❌', key: m.key } });
+      return reply('❌ Failed to fetch video. Please try again later.');
     }
 
-    // Prefer HD, fallback to SD
-    const hd = data.result.find(v => v.quality === "HD");
-    const sd = data.result.find(v => v.quality === "SD");
-    const video = hd || sd;
+    // HD/SD Quality Check
+    let videoUrl = null;
+    let quality = null;
 
-    if (!video) return reply("❌ Video not found in the response.");
+    if (Array.isArray(data.result)) {
+      const hd = data.result.find(v => v.quality?.toLowerCase() === "hd");
+      const sd = data.result.find(v => v.quality?.toLowerCase() === "sd");
+      const selected = hd || sd;
+      if (selected) {
+        videoUrl = selected.url;
+        quality = selected.quality;
+      }
+    } else if (data.result.url) {
+      videoUrl = data.result.url;
+      quality = data.result.quality || "Unknown";
+    }
 
-    await reply(`𝑹𝒂𝒉𝒎𝒂𝒏-𝒎𝒅 𝒖𝒑𝒍𝒐𝒂𝒅𝒊𝒏𝒈 𝒚𝒐𝒖𝒓 𝒗𝒊𝒅𝒆𝒐...`);
+    if (!videoUrl) {
+      await conn.sendMessage(from, { react: { text: '❌', key: m.key } });
+      return reply("❌ Couldn't find a downloadable video link.");
+    }
+
+    await reply(`📤 *Rahman-MD uploading your Facebook video...*`);
 
     await conn.sendMessage(from, {
-      video: { url: video.url },
-      caption: `‎*_ʀᴀʜᴍᴀɴ-ᴍᴅ ғʙ ᴅᴏᴡɴʟᴏᴀᴅᴇʀ_*
-‎*╭──────────────━┈⍟*
-‎*┋* *ϙᴜᴀʟɪᴛʏ:* ${video.quality} 
-‎*╰──────────────━┈⍟*
-‎*╭────◉◉◉─────────៚*
-‎  *_ᴘᴏᴡᴇʀᴇᴅ ʙʏ ʀᴀʜᴍᴀɴ-ᴍᴅ_*
-‎*╰────◉◉◉─────────៚*`
+      video: { url: videoUrl },
+      caption: `‎*📥 ʀᴀʜᴍᴀɴ-ᴍᴅ ғᴀᴄᴇʙᴏᴏᴋ ᴅᴏᴡɴʟᴏᴀᴅᴇʀ*\n
+*📺 Quality:* ${quality}\n
+*⚙️ Powered by Rahman-MD Bot*`
     }, { quoted: mek });
 
     await conn.sendMessage(from, { react: { text: '✅', key: m.key } });
+
   } catch (error) {
-    console.error('FB4 Error:', error);
-    reply('❌ Failed to download the video. Please try again later.');
+    console.error('FB Downloader Error:', error);
     await conn.sendMessage(from, { react: { text: '❌', key: m.key } });
+    reply('⚠️ An error occurred while processing your request. Try again later.');
   }
 });
