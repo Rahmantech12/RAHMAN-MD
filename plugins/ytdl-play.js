@@ -59,7 +59,7 @@ cmd({
 
 cmd({ 
     pattern: "yta", 
-    alias: ["playx", "audio"], 
+    alias: ["playx", "audi"], 
     react: "🎧", 
     desc: "Download YouTube song", 
     category: "main", 
@@ -93,8 +93,8 @@ cmd({
 });
 
 cmd({
-    pattern: "play2",
-    alias: ["yta2", "songs"],
+    pattern: "play5",
+    alias: ["yta5", "songs5"],
     react: "🎵",
     desc: "Download high quality YouTube audio",
     category: "media",
@@ -171,7 +171,7 @@ cmd({
  
 cmd({ 
     pattern: "play3", 
-    alias: ["jadu", "music", "dlyt", "playx"], 
+    alias: ["jadu", "musi", "yt", "playx"], 
     react: "❄️", 
     desc: "Download YouTube content with options",
     category: "download", 
