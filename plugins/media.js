@@ -167,8 +167,8 @@ cmd({
 });
 
 cmd({
-  pattern: "photo",
-  alias: ["toimage", "photo"],
+  pattern: "photo2",
+  alias: ["toimage2", "photo2"],
   desc: "Convert a sticker to an image.",
   category: "tools",
   filename: __filename,
