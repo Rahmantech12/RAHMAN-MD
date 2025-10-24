@@ -3,7 +3,7 @@ const axios = require('axios');
 
 cmd({
     pattern: "metaai",
-    alias: ["rahman", "meta"],
+    alias: ["rahmanullah", "meta"],
     react: "🤖",
     desc: "Talk with Rahman AI",
     category: "ai",
