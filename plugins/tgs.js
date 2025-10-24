@@ -5,8 +5,8 @@ const { cmd, commands } = require('../command');
 
 
 cmd({
-  pattern: 'tgs',
-  alias: ['tgsticker', 'telegramsticker'],
+  pattern: 'tgs2',
+  alias: ['tgsticker2', 'telegramsticker2'],
   react: '🎴',
   desc: 'Download and convert Telegram sticker packs to WhatsApp stickers',
   category: 'Mods',
